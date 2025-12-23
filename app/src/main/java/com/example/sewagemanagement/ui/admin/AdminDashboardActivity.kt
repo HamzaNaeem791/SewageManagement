@@ -30,6 +30,14 @@ class AdminDashboardActivity : AppCompatActivity() {
         )
     }
 
+    private val adminViewModel: AdminViewModel by viewModels {
+        ViewModelFactory(
+            authRepository = (application as SewageApplication).container.authRepository
+        )
+    }
+
+    private var availableWorkers: List<com.example.sewagemanagement.data.model.User> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminDashboardBinding.inflate(layoutInflater)
@@ -39,11 +47,12 @@ class AdminDashboardActivity : AppCompatActivity() {
         setupObservers()
         
         viewModel.fetchAllComplaints()
+        adminViewModel.fetchWorkers()
     }
 
     private fun setupUI() {
         val adapter = ComplaintAdapter { complaint ->
-            showStatusUpdateDialog(complaint)
+            showActionDialog(complaint)
         }
         binding.rvAllComplaints.layoutManager = LinearLayoutManager(this)
         binding.rvAllComplaints.adapter = adapter
@@ -55,16 +64,46 @@ class AdminDashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun showActionDialog(complaint: com.example.sewagemanagement.data.model.Complaint) {
+        val options = arrayOf("Update Status", "Assign to Worker")
+        AlertDialog.Builder(this)
+            .setTitle("Manage Complaint")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showStatusUpdateDialog(complaint)
+                    1 -> showAssignWorkerDialog(complaint)
+                }
+            }
+            .show()
+    }
+
     private fun showStatusUpdateDialog(complaint: com.example.sewagemanagement.data.model.Complaint) {
         val statuses = arrayOf("Pending", "In Progress", "Resolved")
         AlertDialog.Builder(this)
-            .setTitle("Update Status: ${complaint.issueType}")
+            .setTitle("Update Status")
             .setItems(statuses) { _, which ->
                 val newStatus = statuses[which]
-                // We use timestamp string as pseudo-ID for now based on Repo implementation
                 val id = complaint.timestamp.time.toString() 
                 viewModel.updateStatus(id, newStatus)
                 Toast.makeText(this, "Updating to $newStatus...", Toast.LENGTH_SHORT).show()
+            }
+            .show()
+    }
+
+    private fun showAssignWorkerDialog(complaint: com.example.sewagemanagement.data.model.Complaint) {
+        if (availableWorkers.isEmpty()) {
+            Toast.makeText(this, "No workers found. Register a worker with @worker.com first.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val workerNames = availableWorkers.map { it.name }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Assign Worker")
+            .setItems(workerNames) { _, which ->
+                val selectedWorker = availableWorkers[which]
+                val id = complaint.timestamp.time.toString()
+                viewModel.assignJobToWorker(id, selectedWorker.userId)
+                Toast.makeText(this, "Assigned to ${selectedWorker.name}", Toast.LENGTH_SHORT).show()
             }
             .show()
     }
@@ -77,15 +116,41 @@ class AdminDashboardActivity : AppCompatActivity() {
                         is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                         is Resource.Success -> {
                             binding.progressBar.visibility = View.GONE
-                            (binding.rvAllComplaints.adapter as ComplaintAdapter).submitList(resource.data ?: emptyList())
+                            val complaints = resource.data ?: emptyList()
+                            (binding.rvAllComplaints.adapter as ComplaintAdapter).submitList(complaints)
+                            updateStatistics(complaints)
                         }
                         is Resource.Error -> {
                             binding.progressBar.visibility = View.GONE
-                            Toast.makeText(this@AdminDashboardActivity, resource.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@AdminDashboardActivity, resource.message ?: "Error loading complaints", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
             }
         }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adminViewModel.workers.collect { resource ->
+                    if (resource is Resource.Success) {
+                        availableWorkers = resource.data ?: emptyList()
+                    } else if (resource is Resource.Error) {
+                        Toast.makeText(this@AdminDashboardActivity, resource.message ?: "Error loading workers", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateStatistics(complaints: List<com.example.sewagemanagement.data.model.Complaint>) {
+        val total = complaints.size
+        val pending = complaints.count { it.status.equals("Pending", ignoreCase = true) }
+        val inProgress = complaints.count { it.status.equals("In Progress", ignoreCase = true) }
+        val resolved = complaints.count { it.status.equals("Resolved", ignoreCase = true) }
+
+        binding.tvStatTotal.text = total.toString()
+        binding.tvStatPending.text = pending.toString()
+        binding.tvStatInProgress.text = inProgress.toString()
+        binding.tvStatResolved.text = resolved.toString()
     }
 }

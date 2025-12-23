@@ -47,7 +47,23 @@ class ComplaintViewModel(
     fun updateStatus(complaintId: String, status: String) {
         viewModelScope.launch {
             repository.updateComplaintStatus(complaintId, status)
-            // Refresh list
+            // Refresh based on context (will need to know if we are in Admin or Worker view)
+            // For now, refresh all which is safe for Admin
+            fetchAllComplaints()
+        }
+    }
+
+    fun getWorkerJobs(workerId: String) {
+        _complaints.value = Resource.Loading()
+        viewModelScope.launch {
+            val result = repository.getComplaintsForWorker(workerId)
+            _complaints.value = result
+        }
+    }
+
+    fun assignJobToWorker(complaintId: String, workerId: String) {
+        viewModelScope.launch {
+            repository.assignComplaint(complaintId, workerId)
             fetchAllComplaints()
         }
     }

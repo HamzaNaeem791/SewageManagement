@@ -24,10 +24,10 @@ class ComplaintRepository(
         return try {
             val snapshot = db.collection("complaints")
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .await()
             val complaints = snapshot.toObjects(Complaint::class.java)
+                .sortedByDescending { it.timestamp }
             Resource.Success(complaints)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to fetch complaints")
@@ -49,14 +49,8 @@ class ComplaintRepository(
 
     suspend fun updateComplaintStatus(complaintId: String, newStatus: String): Resource<String> {
         return try {
-            // Find document by filtering or if we used ID as docId. 
-            // Ideally we need the docId. For now, assuming we query by timestamp which we used as ID in UI but that's not the docID.
-            // Let's assume we need to query effectively or modify the model to store docId.
-            // For now, I will assume the timestamp is unique enough or we passed it.
-            // BETTER: Use the doc ID. I need to make sure Complaint model has the Firestore Document ID.
-            // I will implement a query-update for now:
             val snapshot = db.collection("complaints")
-                .whereEqualTo("timestamp", java.util.Date(complaintId.toLong())) // Weak match if ID is timestamp
+                .whereEqualTo("timestamp", java.util.Date(complaintId.toLong()))
                 .get().await()
             
             if (!snapshot.isEmpty) {
@@ -68,6 +62,41 @@ class ComplaintRepository(
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Update failed")
+        }
+    }
+
+    suspend fun getComplaintsForWorker(workerId: String): Resource<List<Complaint>> {
+        return try {
+            val snapshot = db.collection("complaints")
+                .whereEqualTo("assignedTo", workerId)
+                .get()
+                .await()
+            val complaints = snapshot.toObjects(Complaint::class.java)
+                .sortedByDescending { it.timestamp }
+            Resource.Success(complaints)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to fetch jobs")
+        }
+    }
+
+    suspend fun assignComplaint(complaintId: String, workerId: String): Resource<String> {
+        return try {
+            val snapshot = db.collection("complaints")
+                .whereEqualTo("timestamp", java.util.Date(complaintId.toLong()))
+                .get().await()
+            
+            if (!snapshot.isEmpty) {
+                val doc = snapshot.documents[0]
+                db.collection("complaints").document(doc.id).update(
+                    "assignedTo", workerId,
+                    "status", "In Progress" // Auto-set to In Progress when assigned
+                ).await()
+                Resource.Success("Job assigned successfully")
+            } else {
+                Resource.Error("Complaint not found")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Assignment failed")
         }
     }
 }

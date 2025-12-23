@@ -25,7 +25,19 @@ class AuthRepository(
             val result = auth.createUserWithEmailAndPassword(email, pass).await()
             val userId = result.user?.uid ?: throw Exception("User creation failed")
             
-            val user = User(userId, name, email)
+            // Magic Rule: If email ends with @admin.com -> Admin, @worker.com -> Worker, else Citizen
+            val role = when {
+                email.endsWith("@admin.com") -> "admin"
+                email.endsWith("@worker.com") -> "worker"
+                else -> "citizen"
+            }
+            
+            val user = User(
+                userId = userId, 
+                name = name, 
+                email = email,
+                role = role
+            )
             db.collection("users").document(userId).set(user).await()
             
             Resource.Success("Registration Successful")
@@ -55,6 +67,19 @@ class AuthRepository(
             }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Unknown error")
+        }
+    }
+
+    suspend fun getUsersByRole(role: String): Resource<List<User>> {
+        return try {
+            val snapshot = db.collection("users")
+                .whereEqualTo("role", role)
+                .get()
+                .await()
+            val users = snapshot.toObjects(User::class.java)
+            Resource.Success(users)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to fetch users")
         }
     }
 

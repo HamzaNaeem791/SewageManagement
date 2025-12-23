@@ -133,8 +133,7 @@ class ProfileActivity : AppCompatActivity() {
             // Enter Edit Mode
             enableFields(true)
             binding.fabEdit.text = "Save Changes"
-            binding.fabEdit.setIconResource(android.R.drawable.ic_menu_save)
-            binding.fabEdit.backgroundTintList = getColorStateList(R.color.secondary)
+            binding.fabEdit.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_save, 0, 0, 0)
             binding.etName.requestFocus()
         } else {
             // Save Changes
@@ -152,7 +151,7 @@ class ProfileActivity : AppCompatActivity() {
             
             enableFields(false)
             binding.fabEdit.text = "Edit Profile"
-            binding.fabEdit.setIconResource(android.R.drawable.ic_menu_edit)
+            binding.fabEdit.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_edit, 0, 0, 0)
         }
     }
 

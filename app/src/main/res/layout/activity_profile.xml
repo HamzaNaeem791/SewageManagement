@@ -105,13 +105,21 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:hint="Full Name"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:textColorHint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:enabled="false"
+                            android:textColor="@color/text_primary"
                             android:inputType="textPersonName"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -122,13 +130,21 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:hint="Email Address"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:textColorHint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:enabled="false"
+                            android:textColor="@color/text_primary"
                             android:inputType="textEmailAddress"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,13 +155,21 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:hint="Phone Number"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:textColorHint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPhone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:enabled="false"
+                            android:textColor="@color/text_primary"
                             android:inputType="phone"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -158,7 +182,14 @@
                         android:hint="Date of Birth"
                         app:endIconMode="custom"
                         app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:textColorHint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etDob"
@@ -166,6 +197,7 @@
                             android:layout_height="wrap_content"
                             android:enabled="false"
                             android:focusable="false"
+                            android:textColor="@color/text_primary"
                             android:inputType="none"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -176,7 +208,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
                         android:hint="Address"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxCornerRadiusTopStart="16dp"
+                        app:boxCornerRadiusTopEnd="16dp"
+                        app:boxCornerRadiusBottomStart="16dp"
+                        app:boxCornerRadiusBottomEnd="16dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary"
+                        android:textColorHint="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etAddress"
@@ -185,6 +224,7 @@
                             android:lines="3"
                             android:gravity="top|start"
                             android:enabled="false"
+                            android:textColor="@color/text_primary"
                             android:inputType="textMultiLine"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -195,16 +235,20 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/fabEdit"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="24dp"
         android:text="Edit Profile"
         android:textColor="@color/white"
-        android:backgroundTint="@color/secondary"
-        app:icon="@android:drawable/ic_menu_edit"
-        app:iconTint="@color/white"/>
+        android:background="@drawable/bg_button_gradient"
+        android:drawableStart="@android:drawable/ic_menu_edit"
+        android:drawablePadding="8dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:elevation="6dp"
+        android:stateListAnimator="@null"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -10,6 +10,7 @@ data class Complaint(
     val description: String = "",
     val location: GeoPoint? = null,
     val status: String = "Pending", // "Pending", "In Progress", "Resolved"
+    val assignedTo: String = "", // Worker UserId
     val imageUrl: String = "",
     val timestamp: Date = Date()
 )

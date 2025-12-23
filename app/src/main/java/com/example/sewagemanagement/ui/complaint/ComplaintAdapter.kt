@@ -35,14 +35,14 @@ class ComplaintAdapter(
             binding.tvIssueType.text = complaint.issueType
             binding.tvStatus.text = complaint.status
             binding.tvDate.text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(complaint.timestamp)
+            binding.tvDescription.text = complaint.description
 
-            // Dynamic Status Coloring
-            val context = binding.root.context
-            when (complaint.status) {
-                "Pending" -> binding.tvStatus.setChipBackgroundColorResource(android.R.color.holo_orange_light)
-                "In Progress" -> binding.tvStatus.setChipBackgroundColorResource(android.R.color.holo_blue_light)
-                "Resolved" -> binding.tvStatus.setChipBackgroundColorResource(android.R.color.holo_green_light)
-                else -> binding.tvStatus.setChipBackgroundColorResource(android.R.color.darker_gray)
+            // Premium Status Coloring
+            when (complaint.status.lowercase()) {
+                "pending" -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.status_pending_start)
+                "in progress" -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.status_inprogress_start)
+                "resolved" -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.status_resolved_start)
+                else -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.gray_text)
             }
 
             binding.root.setOnClickListener { onItemClick(complaint) }

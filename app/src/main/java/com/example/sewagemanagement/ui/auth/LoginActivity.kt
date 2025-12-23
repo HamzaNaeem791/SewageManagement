@@ -1,5 +1,7 @@
 package com.example.sewagemanagement.ui.auth
 
+import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -34,6 +36,36 @@ class LoginActivity : AppCompatActivity() {
 
         setupListeners()
         observeViewModel()
+        playEntryAnimations()
+    }
+
+    private fun playEntryAnimations() {
+        // Initial state: transparent and slightly shifted down
+        val views = listOf(
+            binding.ivLogo,
+            binding.tvTitle,
+            binding.tvSubtitle,
+            binding.tilEmail,
+            binding.tilPassword,
+            binding.btnLogin,
+            binding.tvRegister
+        )
+
+        views.forEach { view ->
+            view.alpha = 0f
+            view.translationY = 50f
+        }
+
+        // Sequential animation
+        views.forEachIndexed { index, view ->
+            view.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(600)
+                .setStartDelay(100L * index)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+        }
     }
 
     private fun setupListeners() {
