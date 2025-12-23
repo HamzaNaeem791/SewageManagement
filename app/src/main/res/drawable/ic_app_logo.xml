@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Shield Outline -->
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="M12,1L3,5v6c0,5.55 3.84,10.74 9,12c5.16,-1.26 9,-6.45 9,-12V5L12,1z"/>
+        
+    <!-- Inner Water Drop -->
+    <path
+        android:fillColor="#00B0FF"
+        android:pathData="M12,19c-3.31,0 -6,-2.63 -6,-5.87c0,-2.03 1.05,-3.91 2.81,-5.06L12,5l3.19,3.07C16.95,9.22 18,11.1 18,13.13C18,16.37 15.31,19 12,19z"/>
+        
+    <!-- Subtle Shine -->
+    <path
+        android:fillColor="#80FFFFFF"
+        android:pathData="M13.5,10.5c-0.5,-0.5 -1.5,-0.5 -1.5,0c0,0.5 0.5,1.5 1.5,1.5S14,11 13.5,10.5z"/>
+</vector>
