@@ -40,6 +40,8 @@
         <activity android:name=".ui.dashboard.DashboardActivity" />
         <activity android:name=".ui.complaint.SubmitComplaintActivity" />
         <activity android:name=".ui.complaint.ComplaintHistoryActivity" />
+        <activity android:name=".ui.complaint.ComplaintTrackingActivity" 
+                  android:label="Track Status"/>
         <activity android:name=".ui.profile.ProfileActivity" />
 
 

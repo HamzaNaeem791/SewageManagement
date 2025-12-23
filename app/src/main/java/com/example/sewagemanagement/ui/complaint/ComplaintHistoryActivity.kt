@@ -23,7 +23,16 @@ class ComplaintHistoryActivity : AppCompatActivity() {
             complaintRepository = (application as com.example.sewagemanagement.SewageApplication).container.complaintRepository
         )
     }
-    private val adapter = ComplaintAdapter()
+    private val adapter = ComplaintAdapter { complaint ->
+        val intent = android.content.Intent(this, ComplaintTrackingActivity::class.java)
+        // Pass essential data. In a real app, pass Parcelable. Here passing fields.
+        intent.putExtra("COMPLAINT_ID", complaint.timestamp.time.toString()) // Using timestamp as pseudo-ID or pass real doc ID if added to model
+        intent.putExtra("ISSUE_TYPE", complaint.issueType)
+        intent.putExtra("STATUS", complaint.status)
+        intent.putExtra("DESCRIPTION", complaint.description)
+        intent.putExtra("DATE", java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(complaint.timestamp))
+        startActivity(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
