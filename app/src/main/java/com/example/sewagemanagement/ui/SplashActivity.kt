@@ -27,7 +27,14 @@ class SplashActivity : AppCompatActivity() {
         // Simple delay for splash (2.5 seconds)
         // In a real app, you might check for user session here
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginActivity::class.java))
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            if (currentUser != null) {
+                // User is signed in, redirect to Dashboard
+                startActivity(Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java))
+            } else {
+                // No user is signed in, redirect to Login
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
         }, 2500)

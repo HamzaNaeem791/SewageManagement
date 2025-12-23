@@ -94,10 +94,30 @@ class SubmitComplaintActivity : AppCompatActivity() {
     }
 
     private fun fetchLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return
-        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            userLocation = location
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
         }
+        
+        // Show loading indication for location
+        Toast.makeText(this, "Fetching precise location...", Toast.LENGTH_SHORT).show()
+        
+        val priority = com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
+        val cancellationTokenSource = com.google.android.gms.tasks.CancellationTokenSource()
+
+        fusedLocationClient.getCurrentLocation(priority, cancellationTokenSource.token)
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    userLocation = location
+                    Toast.makeText(this, "Location fetched successfully", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Unable to get location. Ensure GPS is on.", Toast.LENGTH_LONG).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Location error: ${it.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun submitComplaint() {
