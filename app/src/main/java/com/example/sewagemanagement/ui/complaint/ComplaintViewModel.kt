@@ -35,4 +35,20 @@ class ComplaintViewModel(
             _complaints.value = result
         }
     }
+
+    fun fetchAllComplaints() {
+        _complaints.value = Resource.Loading()
+        viewModelScope.launch {
+            val result = repository.getAllComplaints()
+            _complaints.value = result
+        }
+    }
+
+    fun updateStatus(complaintId: String, status: String) {
+        viewModelScope.launch {
+            repository.updateComplaintStatus(complaintId, status)
+            // Refresh list
+            fetchAllComplaints()
+        }
+    }
 }
