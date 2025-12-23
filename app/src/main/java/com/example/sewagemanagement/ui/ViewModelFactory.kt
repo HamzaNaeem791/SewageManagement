@@ -26,6 +26,12 @@ class ViewModelFactory(
             }
             return ComplaintViewModel(complaintRepository) as T
         }
+        if (modelClass.isAssignableFrom(com.example.sewagemanagement.ui.profile.ProfileViewModel::class.java)) {
+             if (authRepository == null) {
+                throw IllegalArgumentException("AuthRepository required for ProfileViewModel")
+            }
+            return com.example.sewagemanagement.ui.profile.ProfileViewModel(authRepository) as T
+        }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

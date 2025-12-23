@@ -11,7 +11,6 @@ class AuthRepository(
     private val db: FirebaseFirestore
 ) {
 
-
     suspend fun login(email: String, pass: String): Resource<String> {
         return try {
             auth.signInWithEmailAndPassword(email, pass).await()
@@ -39,5 +38,32 @@ class AuthRepository(
     
     fun logout() {
         auth.signOut()
+    }
+
+    suspend fun getUser(userId: String): Resource<User> {
+        return try {
+            val document = db.collection("users").document(userId).get().await()
+            if (document.exists()) {
+                val user = document.toObject(User::class.java)
+                if (user != null) {
+                    Resource.Success(user)
+                } else {
+                    Resource.Error("User data parsing failed")
+                }
+            } else {
+                Resource.Error("User not found")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Unknown error")
+        }
+    }
+
+    suspend fun updateUser(user: User): Resource<String> {
+        return try {
+            db.collection("users").document(user.userId).set(user).await()
+            Resource.Success("Profile updated successfully")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to update profile")
+        }
     }
 }
