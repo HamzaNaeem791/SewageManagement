@@ -43,6 +43,8 @@
         <activity android:name=".ui.complaint.ComplaintTrackingActivity" 
                   android:label="Track Status"/>
         <activity android:name=".ui.profile.ProfileActivity" />
+        <activity android:name=".ui.admin.AdminDashboardActivity" />
+        <activity android:name=".ui.worker.WorkerDashboardActivity" />
 
 
 

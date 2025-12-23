@@ -60,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
                         is Resource.Success -> {
                             binding.progressBar.isVisible = false
                             binding.btnLogin.isEnabled = true
-                            navigateToDashboard()
+                            checkUserRoleAndNavigate()
                         }
                         is Resource.Error -> {
                             binding.progressBar.isVisible = false
@@ -77,11 +77,23 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToDashboard() {
-        val intent = Intent(this, DashboardActivity::class.java)
-        // Clear back stack to prevent going back to login
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+    private fun checkUserRoleAndNavigate() {
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val role = document.getString("role") ?: "citizen"
+                        val intent = when (role) {
+                            "admin" -> Intent(this, com.example.sewagemanagement.ui.admin.AdminDashboardActivity::class.java)
+                            "worker" -> Intent(this, com.example.sewagemanagement.ui.worker.WorkerDashboardActivity::class.java)
+                            else -> Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java)
+                        }
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        finish()
+                    }
+                }
+        }
     }
 }

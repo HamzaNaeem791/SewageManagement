@@ -27,16 +27,47 @@ class SplashActivity : AppCompatActivity() {
         // Simple delay for splash (2.5 seconds)
         // In a real app, you might check for user session here
         Handler(Looper.getMainLooper()).postDelayed({
-            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-            if (currentUser != null) {
-                // User is signed in, redirect to Dashboard
-                startActivity(Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java))
-            } else {
-                // No user is signed in, redirect to Login
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-            finish()
-        }, 2500)
+            checkUserAndNavigate()
+        }, 2000)
+    }
+
+    private fun checkUserAndNavigate() {
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        val currentUser = auth.currentUser
+
+        if (currentUser != null) {
+            db.collection("users").document(currentUser.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val role = document.getString("role") ?: "citizen"
+                        navigateBasedOnRole(role)
+                    } else {
+                        startAuth()
+                    }
+                }
+                .addOnFailureListener {
+                    startAuth()
+                }
+        } else {
+            startAuth()
+        }
+    }
+
+    private fun navigateBasedOnRole(role: String) {
+        val intent = when (role) {
+            "admin" -> Intent(this, com.example.sewagemanagement.ui.admin.AdminDashboardActivity::class.java)
+            "worker" -> Intent(this, com.example.sewagemanagement.ui.worker.WorkerDashboardActivity::class.java)
+            else -> Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java)
+        }
+        startActivity(intent)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        finish()
+    }
+    
+    private fun startAuth() {
+        startActivity(Intent(this, LoginActivity::class.java))
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        finish()
     }
 }
