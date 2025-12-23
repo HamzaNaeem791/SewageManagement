@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "406643497222",
+    "project_id": "sewagemanagement-d1aef",
+    "storage_bucket": "sewagemanagement-d1aef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406643497222:android:43a1c09711ed08cb14a687",
+        "android_client_info": {
+          "package_name": "com.example.sewagemanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOFx51A9sw37olAN0lRvWsajdPmhetwn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

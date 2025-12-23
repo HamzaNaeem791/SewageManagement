@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- Header Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@color/primary"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:background="@drawable/ic_launcher_background"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User Name"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"/>
+
+        <TextView
+            android:id="@+id/tvEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="user@example.com"
+            android:textSize="14sp"
+            android:textColor="#B3FFFFFF"/>
+    </LinearLayout>
+
+    <!-- Details Section -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="-20dp"
+        android:paddingHorizontal="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/gray_light"
+                app:cardBackgroundColor="@color/white"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Account Settings"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary"
+                        android:layout_marginBottom="24dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="12dp">
+                        
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_edit"
+                            app:tint="@color/gray_text"/>
+                            
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Edit Profile"
+                            android:layout_marginStart="16dp"
+                            android:textColor="@color/on_surface"
+                            android:textSize="16sp"/>
+                            
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_media_play"
+                            app:tint="@color/gray_light"
+                            android:rotation="180"/>
+                    </LinearLayout>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/gray_light"
+                        android:layout_marginVertical="8dp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Back to Dashboard"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
