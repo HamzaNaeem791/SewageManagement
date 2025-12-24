@@ -23,7 +23,7 @@ class ComplaintHistoryActivity : AppCompatActivity() {
             complaintRepository = (application as com.example.sewagemanagement.SewageApplication).container.complaintRepository
         )
     }
-    private val adapter = ComplaintAdapter { complaint ->
+    private val adapter = ComplaintAdapter(onItemClick = { complaint ->
         val intent = android.content.Intent(this, ComplaintTrackingActivity::class.java)
         // Pass essential data. In a real app, pass Parcelable. Here passing fields.
         intent.putExtra("COMPLAINT_ID", complaint.timestamp.time.toString())
@@ -34,7 +34,7 @@ class ComplaintHistoryActivity : AppCompatActivity() {
         intent.putExtra("LATITUDE", complaint.location?.latitude ?: 0.0)
         intent.putExtra("LONGITUDE", complaint.location?.longitude ?: 0.0)
         startActivity(intent)
-    }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

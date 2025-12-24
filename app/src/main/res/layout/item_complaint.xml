@@ -71,7 +71,28 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:layout_marginTop="4dp"/>
-            
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_light"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewOnMap"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View on Map"
+            android:textColor="@color/primary"
+            app:icon="@android:drawable/ic_dialog_map"
+            app:iconTint="@color/primary"
+            android:layout_gravity="end"
+            android:textSize="12sp"
+            android:textAllCaps="false"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"/>
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

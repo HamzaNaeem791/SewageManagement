@@ -49,9 +49,9 @@ class WorkerDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        val adapter = ComplaintAdapter { complaint ->
+        val adapter = ComplaintAdapter(onItemClick = { complaint ->
             showStatusUpdateDialog(complaint)
-        }
+        })
         binding.rvAssignedJobs.layoutManager = LinearLayoutManager(this)
         binding.rvAssignedJobs.adapter = adapter
 

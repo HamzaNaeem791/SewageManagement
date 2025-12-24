@@ -9,7 +9,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class ComplaintAdapter(
-    private val onItemClick: (Complaint) -> Unit
+    private val onItemClick: (Complaint) -> Unit,
+    private val onMapClick: ((Complaint) -> Unit)? = null
 ) : RecyclerView.Adapter<ComplaintAdapter.ComplaintViewHolder>() {
 
     private var complaints: List<Complaint> = emptyList()
@@ -25,13 +26,13 @@ class ComplaintAdapter(
     }
 
     override fun onBindViewHolder(holder: ComplaintViewHolder, position: Int) {
-        holder.bind(complaints[position], onItemClick)
+        holder.bind(complaints[position], onItemClick, onMapClick)
     }
 
     override fun getItemCount() = complaints.size
 
     class ComplaintViewHolder(private val binding: ItemComplaintBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(complaint: Complaint, onItemClick: (Complaint) -> Unit) {
+        fun bind(complaint: Complaint, onItemClick: (Complaint) -> Unit, onMapClick: ((Complaint) -> Unit)? = null) {
             binding.tvIssueType.text = complaint.issueType
             binding.tvStatus.text = complaint.status
             binding.tvDate.text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(complaint.timestamp)
@@ -43,6 +44,14 @@ class ComplaintAdapter(
                 "in progress" -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.status_inprogress_start)
                 "resolved" -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.status_resolved_start)
                 else -> binding.tvStatus.setChipBackgroundColorResource(com.example.sewagemanagement.R.color.gray_text)
+            }
+
+            // Map Button visibility and action
+            if (onMapClick != null && complaint.location != null) {
+                binding.btnViewOnMap.visibility = android.view.View.VISIBLE
+                binding.btnViewOnMap.setOnClickListener { onMapClick(complaint) }
+            } else {
+                binding.btnViewOnMap.visibility = android.view.View.GONE
             }
 
             binding.root.setOnClickListener { onItemClick(complaint) }
