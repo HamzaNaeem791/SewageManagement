@@ -29,7 +29,7 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, ComplaintHistoryActivity::class.java))
         }
 
-        binding.btnProfile.setOnClickListener {
+        binding.ivProfile.setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
         }
 
