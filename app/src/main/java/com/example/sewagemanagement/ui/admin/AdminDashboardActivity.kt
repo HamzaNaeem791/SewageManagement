@@ -41,19 +41,20 @@ class AdminDashboardActivity : AppCompatActivity() {
 
     private var availableWorkers: List<com.example.sewagemanagement.data.model.User> = emptyList()
     private var createWorkerDialog: AlertDialog? = null
+    private var isAdminConfirmed: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (!ensureSessionAndRole()) return
-
         setupUI()
         setupObservers()
-        
-        viewModel.fetchAllComplaints()
-        adminViewModel.fetchWorkers()
+
+        // Keep it simple: hide admin-only actions until role is confirmed.
+        binding.btnCreateWorker.visibility = View.GONE
+
+        if (!ensureSessionAndRole()) return
     }
 
     private fun ensureSessionAndRole(): Boolean {
@@ -71,7 +72,16 @@ class AdminDashboardActivity : AppCompatActivity() {
                     val role = (result.data?.role ?: "citizen").trim().lowercase()
                     if (role != "admin") {
                         RoleNavigator.startAndClearTask(this@AdminDashboardActivity, role)
+                        return@launch
                     }
+
+                    // Role confirmed.
+                    isAdminConfirmed = true
+                    binding.btnCreateWorker.visibility = View.VISIBLE
+
+                    // Load admin-only data only after confirmation.
+                    viewModel.fetchAllComplaints()
+                    adminViewModel.fetchWorkers()
                 }
                 else -> {
                     // If role can't be resolved, force re-auth
@@ -104,6 +114,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         binding.rvAllComplaints.adapter = adapter
 
         binding.btnCreateWorker.setOnClickListener {
+            if (!isAdminConfirmed) return@setOnClickListener
             showCreateWorkerDialog()
         }
 
