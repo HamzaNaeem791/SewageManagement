@@ -13,8 +13,10 @@ class ComplaintRepository(
 
     suspend fun submitComplaint(complaint: Complaint): Resource<String> {
         return try {
-            db.collection("complaints").add(complaint).await()
-            Resource.Success("Complaint Submitted Successfully")
+            val docRef = db.collection("complaints").document()
+            val complaintWithId = complaint.copy(complaintId = docRef.id)
+            docRef.set(complaintWithId).await()
+            Resource.Success(docRef.id)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Submission Failed")
         }
@@ -26,7 +28,10 @@ class ComplaintRepository(
                 .whereEqualTo("userId", userId)
                 .get()
                 .await()
-            val complaints = snapshot.toObjects(Complaint::class.java)
+            val complaints = snapshot.documents
+                .mapNotNull { doc ->
+                    doc.toObject(Complaint::class.java)?.copy(complaintId = doc.id)
+                }
                 .sortedByDescending { it.timestamp }
             Resource.Success(complaints)
         } catch (e: Exception) {
@@ -40,7 +45,10 @@ class ComplaintRepository(
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .await()
-            val complaints = snapshot.toObjects(Complaint::class.java)
+            val complaints = snapshot.documents
+                .mapNotNull { doc ->
+                    doc.toObject(Complaint::class.java)?.copy(complaintId = doc.id)
+                }
             Resource.Success(complaints)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to fetch all complaints")
@@ -49,17 +57,10 @@ class ComplaintRepository(
 
     suspend fun updateComplaintStatus(complaintId: String, newStatus: String): Resource<String> {
         return try {
-            val snapshot = db.collection("complaints")
-                .whereEqualTo("timestamp", java.util.Date(complaintId.toLong()))
-                .get().await()
-            
-            if (!snapshot.isEmpty) {
-                val doc = snapshot.documents[0]
-                db.collection("complaints").document(doc.id).update("status", newStatus).await()
-                Resource.Success("Status updated to $newStatus")
-            } else {
-                 Resource.Error("Complaint not found")
-            }
+            db.collection("complaints").document(complaintId)
+                .update("status", newStatus)
+                .await()
+            Resource.Success("Status updated to $newStatus")
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Update failed")
         }
@@ -71,7 +72,10 @@ class ComplaintRepository(
                 .whereEqualTo("assignedTo", workerId)
                 .get()
                 .await()
-            val complaints = snapshot.toObjects(Complaint::class.java)
+            val complaints = snapshot.documents
+                .mapNotNull { doc ->
+                    doc.toObject(Complaint::class.java)?.copy(complaintId = doc.id)
+                }
                 .sortedByDescending { it.timestamp }
             Resource.Success(complaints)
         } catch (e: Exception) {
@@ -81,20 +85,11 @@ class ComplaintRepository(
 
     suspend fun assignComplaint(complaintId: String, workerId: String): Resource<String> {
         return try {
-            val snapshot = db.collection("complaints")
-                .whereEqualTo("timestamp", java.util.Date(complaintId.toLong()))
-                .get().await()
-            
-            if (!snapshot.isEmpty) {
-                val doc = snapshot.documents[0]
-                db.collection("complaints").document(doc.id).update(
-                    "assignedTo", workerId,
-                    "status", "In Progress" // Auto-set to In Progress when assigned
-                ).await()
-                Resource.Success("Job assigned successfully")
-            } else {
-                Resource.Error("Complaint not found")
-            }
+            db.collection("complaints").document(complaintId).update(
+                "assignedTo", workerId,
+                "status", "In Progress" // Auto-set to In Progress when assigned
+            ).await()
+            Resource.Success("Job assigned successfully")
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Assignment failed")
         }

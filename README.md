@@ -20,6 +20,7 @@ An intelligent, real-time solution for urban sanitation management. This applica
 - **Cloud Firestore**: A scalable NoSQL database that enables real-time synchronization of complaints and status updates across all devices.
 - **Firebase Storage**: Handles media uploads, allowing users to attach photos of sewage issues for better assessment.
 - **Firebase Cloud Messaging (FCM)**: Sends instant push notifications for status changes and reminders.
+- **Firebase Cloud Functions**: Used to securely create Worker accounts from the Admin dashboard.
 
 ### Maps & Location
 - **Google Maps SDK**: Integrated for accurate geolocation pinning, helping workers find the exact spot of reported issues.
@@ -85,8 +86,23 @@ The vision for this project extends far beyond simple reporting:
 2. **Firebase Integration**: 
    - Add your `google-services.json` to the `app/` folder.
    - Enable Auth, Firestore, and Storage in the Firebase Console.
+   - Enable Cloud Functions and deploy the callable function in `functions/` (required for Admin → Create Worker).
+   - Deploy Firestore security rules from `firestore.rules`.
 3. **Maps API Key**: Add your Google Maps API key to the `AndroidManifest.xml` file.
 4. **Run**: Sync Gradle and click the "Run" button to deploy to your device.
+
+### Firebase deploy (rules + functions)
+
+- Deploy rules: `firebase deploy --only firestore:rules`
+- Deploy functions: `cd functions` then `npm install` and `npm run deploy`
+
+---
+
+## 👤 Account Rules
+
+- **Citizen accounts** are created from the Register screen.
+- **Worker accounts** are created only by an Admin from the Admin Dashboard.
+- **Admin accounts** are assumed to be pre-seeded in Firebase (no admin signup).
 
 ---
 

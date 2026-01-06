@@ -4,11 +4,14 @@ import com.example.sewagemanagement.data.model.User
 import com.example.sewagemanagement.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository(
     private val auth: FirebaseAuth,
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val functions: FirebaseFunctions
 ) {
 
     suspend fun login(email: String, pass: String): Resource<String> {
@@ -24,14 +27,10 @@ class AuthRepository(
         return try {
             val result = auth.createUserWithEmailAndPassword(email, pass).await()
             val userId = result.user?.uid ?: throw Exception("User creation failed")
-            
-            // Magic Rule: If email ends with @admin.com -> Admin, @worker.com -> Worker, else Citizen
-            val role = when {
-                email.endsWith("@admin.com") -> "admin"
-                email.endsWith("@worker.com") -> "worker"
-                else -> "citizen"
-            }
-            
+
+            // Citizen signup only. Admin is seeded; workers are created by admin.
+            val role = "citizen"
+
             val user = User(
                 userId = userId, 
                 name = name, 
@@ -43,6 +42,36 @@ class AuthRepository(
             Resource.Success("Registration Successful")
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Registration Failed")
+        }
+    }
+
+    suspend fun createWorkerAccount(
+        name: String,
+        email: String,
+        password: String,
+        phoneNumber: String = "",
+        address: String = ""
+    ): Resource<String> {
+        return try {
+            val data = hashMapOf(
+                "name" to name,
+                "email" to email,
+                "password" to password,
+                "phoneNumber" to phoneNumber,
+                "address" to address
+            )
+
+            val result = functions
+                .getHttpsCallable("createWorkerUser")
+                .call(data)
+                .await()
+
+            val uid = (result.data as? Map<*, *>)?.get("uid") as? String
+            Resource.Success(uid ?: "Worker created")
+        } catch (e: FirebaseFunctionsException) {
+            Resource.Error(e.message ?: "Failed to create worker")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to create worker")
         }
     }
     

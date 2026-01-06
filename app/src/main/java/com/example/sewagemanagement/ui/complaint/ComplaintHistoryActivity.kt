@@ -26,7 +26,7 @@ class ComplaintHistoryActivity : AppCompatActivity() {
     private val adapter = ComplaintAdapter(onItemClick = { complaint ->
         val intent = android.content.Intent(this, ComplaintTrackingActivity::class.java)
         // Pass essential data. In a real app, pass Parcelable. Here passing fields.
-        intent.putExtra("COMPLAINT_ID", complaint.timestamp.time.toString())
+        intent.putExtra("COMPLAINT_ID", complaint.complaintId)
         intent.putExtra("ISSUE_TYPE", complaint.issueType)
         intent.putExtra("STATUS", complaint.status)
         intent.putExtra("DESCRIPTION", complaint.description)

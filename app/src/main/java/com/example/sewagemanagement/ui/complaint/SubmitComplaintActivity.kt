@@ -155,7 +155,7 @@ class SubmitComplaintActivity : AppCompatActivity() {
                         is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                         is Resource.Success -> {
                             binding.progressBar.visibility = View.GONE
-                            Toast.makeText(this@SubmitComplaintActivity, resource.data, Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@SubmitComplaintActivity, "Complaint submitted", Toast.LENGTH_LONG).show()
                             finish()
                         }
                         is Resource.Error -> {

@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sewagemanagement.databinding.ActivityWorkerDashboardBinding
 import com.example.sewagemanagement.ui.ViewModelFactory
+import com.example.sewagemanagement.ui.RoleNavigator
 import com.example.sewagemanagement.ui.auth.LoginActivity
 import com.example.sewagemanagement.ui.complaint.ComplaintAdapter
 import com.example.sewagemanagement.ui.complaint.ComplaintViewModel
@@ -35,10 +36,38 @@ class WorkerDashboardActivity : AppCompatActivity() {
         binding = ActivityWorkerDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        if (!ensureSessionAndRole()) return
+
         setupUI()
         setupObservers()
         
         loadJobs()
+    }
+
+    private fun ensureSessionAndRole(): Boolean {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return false
+        }
+
+        lifecycleScope.launch {
+            val authRepository = (application as SewageApplication).container.authRepository
+            when (val result = authRepository.getUser(userId)) {
+                is Resource.Success -> {
+                    val role = result.data?.role ?: "citizen"
+                    if (role != "worker") {
+                        RoleNavigator.startAndClearTask(this@WorkerDashboardActivity, role)
+                    }
+                }
+                else -> {
+                    startActivity(Intent(this@WorkerDashboardActivity, LoginActivity::class.java))
+                    finish()
+                }
+            }
+        }
+        return true
     }
 
     private fun loadJobs() {
@@ -81,8 +110,7 @@ class WorkerDashboardActivity : AppCompatActivity() {
             .setTitle("Update Job Status")
             .setItems(statuses) { _, which ->
                 val newStatus = statuses[which]
-                val id = complaint.timestamp.time.toString() 
-                viewModel.updateStatus(id, newStatus)
+                viewModel.updateStatus(complaint.complaintId, newStatus)
                 Toast.makeText(this, "Updating to $newStatus...", Toast.LENGTH_SHORT).show()
             }
             .show()

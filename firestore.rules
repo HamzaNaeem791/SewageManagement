@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function role() {
+      return signedIn() && userDoc().exists ? userDoc().data.role : null;
+    }
+
+    function isAdmin() {
+      return role() == 'admin';
+    }
+
+    function isWorker() {
+      return role() == 'worker';
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+
+      // Client-side writes: allow users to update their own profile, but never their role.
+      // Worker creation is done by Cloud Functions (Admin SDK), which bypasses rules.
+      allow create: if signedIn() && request.auth.uid == userId
+        && (!('role' in request.resource.data) || request.resource.data.role == 'citizen');
+
+      allow update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role;
+
+      allow delete: if false;
+    }
+
+    match /complaints/{complaintId} {
+      // Citizen submits own complaint.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.complaintId == complaintId;
+
+      // Read:
+      // - admin can read all
+      // - citizen can read their own
+      // - worker can read assigned jobs
+      allow read: if signedIn() && (
+        isAdmin() ||
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.assignedTo
+      );
+
+      // Update:
+      // - admin can update anything
+      // - worker can update status of assigned job only (can't reassign or change ownership)
+      allow update: if signedIn() && (
+        isAdmin() ||
+        (
+          isWorker() &&
+          request.auth.uid == resource.data.assignedTo &&
+          request.resource.data.complaintId == complaintId &&
+          request.resource.data.userId == resource.data.userId &&
+          request.resource.data.assignedTo == resource.data.assignedTo
+        )
+      );
+
+      allow delete: if isAdmin();
+    }
+  }
+}

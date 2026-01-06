@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.sewagemanagement.databinding.ActivitySplashBinding
+import com.example.sewagemanagement.SewageApplication
 import com.example.sewagemanagement.ui.auth.LoginActivity
+import com.example.sewagemanagement.utils.Resource
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
@@ -33,33 +37,31 @@ class SplashActivity : AppCompatActivity() {
 
     private fun checkUserAndNavigate() {
         val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
         val currentUser = auth.currentUser
+        if (currentUser == null) {
+            startAuth()
+            return
+        }
 
-        if (currentUser != null) {
-            db.collection("users").document(currentUser.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        val role = document.getString("role") ?: "citizen"
-                        navigateBasedOnRole(role)
-                    } else {
-                        startAuth()
-                    }
+        val authRepository = (application as SewageApplication).container.authRepository
+        lifecycleScope.launch {
+            when (val result = authRepository.getUser(currentUser.uid)) {
+                is Resource.Success -> {
+                    val role = result.data?.role ?: "citizen"
+                    navigateBasedOnRole(role)
                 }
-                .addOnFailureListener {
+                is Resource.Error -> {
                     startAuth()
                 }
-        } else {
-            startAuth()
+                is Resource.Loading -> {
+                    // no-op (not used here)
+                }
+            }
         }
     }
 
     private fun navigateBasedOnRole(role: String) {
-        val intent = when (role) {
-            "admin" -> Intent(this, com.example.sewagemanagement.ui.admin.AdminDashboardActivity::class.java)
-            "worker" -> Intent(this, com.example.sewagemanagement.ui.worker.WorkerDashboardActivity::class.java)
-            else -> Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java)
-        }
+        val intent = RoleNavigator.intentForRole(this, role)
         startActivity(intent)
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         finish()

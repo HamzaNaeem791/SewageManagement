@@ -14,6 +14,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.sewagemanagement.SewageApplication
 import com.example.sewagemanagement.databinding.ActivityLoginBinding
 import com.example.sewagemanagement.ui.ViewModelFactory
+import com.example.sewagemanagement.ui.RoleNavigator
 import com.example.sewagemanagement.ui.dashboard.DashboardActivity
 import com.example.sewagemanagement.utils.Resource
 import kotlinx.coroutines.launch
@@ -110,22 +111,23 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkUserRoleAndNavigate() {
-        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
-            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        val role = document.getString("role") ?: "citizen"
-                        val intent = when (role) {
-                            "admin" -> Intent(this, com.example.sewagemanagement.ui.admin.AdminDashboardActivity::class.java)
-                            "worker" -> Intent(this, com.example.sewagemanagement.ui.worker.WorkerDashboardActivity::class.java)
-                            else -> Intent(this, com.example.sewagemanagement.ui.dashboard.DashboardActivity::class.java)
-                        }
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                        finish()
-                    }
+        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val authRepository = (application as SewageApplication).container.authRepository
+
+        lifecycleScope.launch {
+            when (val result = authRepository.getUser(userId)) {
+                is Resource.Success -> {
+                    val role = result.data?.role ?: "citizen"
+                    RoleNavigator.startAndClearTask(this@LoginActivity, role)
                 }
+                is Resource.Error -> {
+                    // Fallback to citizen dashboard if profile doc is missing
+                    RoleNavigator.startAndClearTask(this@LoginActivity, "citizen")
+                }
+                is Resource.Loading -> {
+                    // no-op
+                }
+            }
         }
     }
 }
