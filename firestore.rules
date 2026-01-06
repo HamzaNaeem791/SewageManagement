@@ -38,6 +38,13 @@ service cloud.firestore {
       allow update: if signedIn() && request.auth.uid == userId
         && request.resource.data.role == resource.data.role;
 
+      // Allow admin to soft-delete (disable) worker accounts.
+      allow update: if isAdmin()
+        && resource.data.role in ['worker', 'Worker', 'WORKER']
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.userId == userId
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['disabled']);
+
       allow delete: if false;
     }
 

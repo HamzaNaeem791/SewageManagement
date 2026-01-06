@@ -35,7 +35,8 @@ class AuthRepository(
             dob = anyToString(get("dob")),
             phoneNumber = anyToString(get("phoneNumber")),
             address = anyToString(get("address")),
-            role = anyToString(roleValue).ifBlank { "citizen" }
+            role = anyToString(roleValue).ifBlank { "citizen" },
+            disabled = getBoolean("disabled") ?: false
         )
     }
 
@@ -174,7 +175,8 @@ class AuthRepository(
                 dob = "",
                 phoneNumber = phoneNumber,
                 address = address,
-                role = "worker"
+                role = "worker",
+                disabled = false
             )
             db.collection("users").document(createdUid).set(worker).await()
 
@@ -236,6 +238,17 @@ class AuthRepository(
             Resource.Success("Profile updated successfully")
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to update profile")
+        }
+    }
+
+    suspend fun disableWorker(userId: String): Resource<String> {
+        return try {
+            db.collection("users").document(userId)
+                .update("disabled", true)
+                .await()
+            Resource.Success("Worker disabled")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to delete worker")
         }
     }
 }
