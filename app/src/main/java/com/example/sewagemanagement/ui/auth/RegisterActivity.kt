@@ -1,7 +1,14 @@
 package com.example.sewagemanagement.ui.auth
 
-import android.view.animation.DecelerateInterpolator
+import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +21,7 @@ import com.example.sewagemanagement.databinding.ActivityRegisterBinding
 import com.example.sewagemanagement.ui.ViewModelFactory
 import com.example.sewagemanagement.utils.Resource
 import kotlinx.coroutines.launch
+import android.view.animation.DecelerateInterpolator
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -32,8 +40,42 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupListeners()
+        setupTermsText()
         observeViewModel()
         playEntryAnimations()
+    }
+
+    private fun setupTermsText() {
+        val fullText = "I agree to the Terms and Conditions and Privacy Policy"
+        val spannableString = SpannableString(fullText)
+
+        val termsClickable = object : ClickableSpan() {
+            override fun onClick(view: View) {
+                startActivity(Intent(this@RegisterActivity, TermsActivity::class.java))
+            }
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.isUnderlineText = true
+                ds.color = Color.parseColor("#0D47A1") // primary color
+            }
+        }
+
+        val privacyClickable = object : ClickableSpan() {
+            override fun onClick(view: View) {
+                startActivity(Intent(this@RegisterActivity, TermsActivity::class.java))
+            }
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.isUnderlineText = true
+                ds.color = Color.parseColor("#0D47A1") // primary color
+            }
+        }
+
+        spannableString.setSpan(termsClickable, 15, 35, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(privacyClickable, 40, 54, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        binding.tvAgreement.text = spannableString
+        binding.tvAgreement.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun playEntryAnimations() {
@@ -44,6 +86,7 @@ class RegisterActivity : AppCompatActivity() {
             binding.tilName,
             binding.tilEmail,
             binding.tilPassword,
+            binding.llAgreement,
             binding.btnRegister,
             binding.tvLogin
         )
@@ -66,6 +109,10 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnRegister.setOnClickListener {
+            if (!binding.cbTerms.isChecked) {
+                Toast.makeText(this, "Please agree to Terms and Conditions", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             val name = binding.etName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
