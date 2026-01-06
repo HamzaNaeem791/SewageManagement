@@ -27,9 +27,14 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
 
       // Client-side writes: allow users to update their own profile, but never their role.
-      // Worker creation is done by Cloud Functions (Admin SDK), which bypasses rules.
+      // Preferred: worker creation is done by Cloud Functions (Admin SDK), which bypasses rules.
+      // Fallback (no Blaze / no Functions): allow an admin to create worker profile docs.
       allow create: if signedIn() && request.auth.uid == userId
         && (!('role' in request.resource.data) || request.resource.data.role == 'citizen');
+
+      allow create: if isAdmin()
+        && request.resource.data.role == 'worker'
+        && request.resource.data.userId == userId;
 
       allow update: if signedIn() && request.auth.uid == userId
         && request.resource.data.role == resource.data.role;

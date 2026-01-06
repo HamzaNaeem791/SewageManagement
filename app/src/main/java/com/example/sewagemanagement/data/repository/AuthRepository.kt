@@ -3,6 +3,8 @@ package com.example.sewagemanagement.data.repository
 import com.example.sewagemanagement.data.model.User
 import com.example.sewagemanagement.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
@@ -12,7 +14,8 @@ import kotlinx.coroutines.tasks.await
 class AuthRepository(
     private val auth: FirebaseAuth,
     private val db: FirebaseFirestore,
-    private val functions: FirebaseFunctions
+    private val functions: FirebaseFunctions,
+    private val workerCreatorAuth: FirebaseAuth
 ) {
 
     private fun DocumentSnapshot.toUserSafe(): User {
@@ -91,9 +94,107 @@ class AuthRepository(
             val uid = (result.data as? Map<*, *>)?.get("uid") as? String
             Resource.Success(uid ?: "Worker created")
         } catch (e: FirebaseFunctionsException) {
-            Resource.Error(e.message ?: "Failed to create worker")
+            val code = e.code
+            val details = e.details
+
+            val baseMessage = (e.message ?: "Failed to create worker").trim()
+
+            val hint = when (code) {
+                FirebaseFunctionsException.Code.NOT_FOUND ->
+                    "Cloud Function 'createWorkerUser' was not found. If you haven't upgraded to Blaze/deployed Functions yet, the app can fall back to client-side worker creation (less secure)."
+                FirebaseFunctionsException.Code.PERMISSION_DENIED ->
+                    "Permission denied. Ensure the logged-in user has a Firestore users/{uid} document with role='admin'."
+                else -> null
+            }
+
+            val message = buildString {
+                append(baseMessage)
+                append(" (code=")
+                append(code.name)
+                append(")")
+                if (details != null) {
+                    append(" details=")
+                    append(details.toString())
+                }
+                if (!hint.isNullOrBlank()) {
+                    append("\n")
+                    append(hint)
+                }
+            }
+
+            // If Functions aren't deployed (common on Spark plan), fall back to client-side creation.
+            if (code == FirebaseFunctionsException.Code.NOT_FOUND) {
+                createWorkerAccountClientSide(
+                    name = name,
+                    email = email,
+                    password = password,
+                    phoneNumber = phoneNumber,
+                    address = address
+                )
+            } else {
+                Resource.Error(message)
+            }
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to create worker")
+        }
+    }
+
+    private suspend fun createWorkerAccountClientSide(
+        name: String,
+        email: String,
+        password: String,
+        phoneNumber: String,
+        address: String
+    ): Resource<String> {
+        // IMPORTANT:
+        // - This does NOT require Blaze.
+        // - It is less secure than Cloud Functions because account creation happens from the client.
+        // - Firestore rules must still enforce that only admins can create a worker profile doc.
+
+        var createdUid: String? = null
+        try {
+            val result = workerCreatorAuth.createUserWithEmailAndPassword(email, password).await()
+            val createdUser = result.user ?: throw Exception("Worker Auth user creation failed")
+            createdUid = createdUser.uid
+
+            // Optional: set display name for the new worker.
+            try {
+                createdUser.updateProfile(
+                    UserProfileChangeRequest.Builder().setDisplayName(name).build()
+                ).await()
+            } catch (_: Exception) {
+                // best-effort only
+            }
+
+            // Create worker profile document as the currently logged-in admin (primary auth).
+            val worker = User(
+                userId = createdUid,
+                name = name,
+                email = email,
+                dob = "",
+                phoneNumber = phoneNumber,
+                address = address,
+                role = "worker"
+            )
+            db.collection("users").document(createdUid).set(worker).await()
+
+            return Resource.Success(createdUid)
+        } catch (e: FirebaseAuthUserCollisionException) {
+            return Resource.Error("Email already in use")
+        } catch (e: Exception) {
+            // Rollback: if we created the Auth user but failed to write Firestore profile, delete the user.
+            try {
+                workerCreatorAuth.currentUser?.delete()?.await()
+            } catch (_: Exception) {
+                // ignore rollback failures
+            }
+            return Resource.Error(e.message ?: "Failed to create worker")
+        } finally {
+            // Ensure the admin stays logged in on primary auth.
+            try {
+                workerCreatorAuth.signOut()
+            } catch (_: Exception) {
+            }
         }
     }
     

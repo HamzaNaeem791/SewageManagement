@@ -2,6 +2,7 @@ package com.example.sewagemanagement.ui.admin
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -260,7 +261,15 @@ class AdminDashboardActivity : AppCompatActivity() {
                             adminViewModel.fetchWorkers()
                         }
                         is Resource.Error -> {
-                            Toast.makeText(this@AdminDashboardActivity, resource.message ?: "Failed to create worker", Toast.LENGTH_SHORT).show()
+                            val message = resource.message ?: "Failed to create worker"
+                            Log.e("WorkerCreate", message)
+
+                            // Toasts can be killed/truncated; show the full error for diagnosis.
+                            AlertDialog.Builder(this@AdminDashboardActivity)
+                                .setTitle("Create Worker Failed")
+                                .setMessage(message)
+                                .setPositiveButton("OK", null)
+                                .show()
                             adminViewModel.resetCreateWorkerStatus()
                         }
                         null -> {
