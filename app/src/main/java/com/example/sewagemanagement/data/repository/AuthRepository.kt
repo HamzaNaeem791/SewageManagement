@@ -3,6 +3,7 @@ package com.example.sewagemanagement.data.repository
 import com.example.sewagemanagement.data.model.User
 import com.example.sewagemanagement.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.FirebaseFunctionsException
@@ -13,6 +14,27 @@ class AuthRepository(
     private val db: FirebaseFirestore,
     private val functions: FirebaseFunctions
 ) {
+
+    private fun DocumentSnapshot.toUserSafe(): User {
+        fun anyToString(value: Any?): String {
+            return when (value) {
+                null -> ""
+                is String -> value
+                else -> value.toString()
+            }
+        }
+
+        val roleValue = get("role")
+        return User(
+            userId = getString("userId") ?: id,
+            name = anyToString(get("name")),
+            email = getString("email") ?: "",
+            dob = anyToString(get("dob")),
+            phoneNumber = anyToString(get("phoneNumber")),
+            address = anyToString(get("address")),
+            role = anyToString(roleValue).ifBlank { "citizen" }
+        )
+    }
 
     suspend fun login(email: String, pass: String): Resource<String> {
         return try {
@@ -85,12 +107,7 @@ class AuthRepository(
         return try {
             val document = db.collection("users").document(userId).get().await()
             if (document.exists()) {
-                val user = document.toObject(User::class.java)
-                if (user != null) {
-                    Resource.Success(user)
-                } else {
-                    Resource.Error("User data parsing failed")
-                }
+                Resource.Success(document.toUserSafe())
             } else {
                 Resource.Error("User not found")
             }
@@ -105,7 +122,7 @@ class AuthRepository(
                 .whereEqualTo("role", role)
                 .get()
                 .await()
-            val users = snapshot.toObjects(User::class.java)
+            val users = snapshot.documents.map { it.toUserSafe() }
             Resource.Success(users)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to fetch users")

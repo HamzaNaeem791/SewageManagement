@@ -50,6 +50,10 @@
 
 
         <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8353561167653029~2343715354" />
+
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBYkkCbGkRvhIwM338F6fD6fJt3ES9pHLg" />
 

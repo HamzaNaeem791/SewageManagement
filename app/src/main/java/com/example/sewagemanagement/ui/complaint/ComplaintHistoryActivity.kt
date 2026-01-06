@@ -1,6 +1,7 @@
 package com.example.sewagemanagement.ui.complaint
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -10,6 +11,9 @@ import com.example.sewagemanagement.databinding.ActivityComplaintHistoryBinding
 import com.example.sewagemanagement.utils.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.example.sewagemanagement.ui.ViewModelFactory
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.Lifecycle
@@ -42,6 +46,7 @@ class ComplaintHistoryActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView()
+        setupBannerAd()
         
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
@@ -52,6 +57,37 @@ class ComplaintHistoryActivity : AppCompatActivity() {
         }
 
         observeViewModel()
+    }
+
+    private fun setupBannerAd() {
+        Log.d("AdMobBanner", "ComplaintHistory: loading banner")
+        binding.adViewBanner.adListener = object : AdListener() {
+            override fun onAdLoaded() {
+                Log.d("AdMobBanner", "ComplaintHistory: banner loaded")
+                binding.adViewBanner.visibility = View.VISIBLE
+            }
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("AdMobBanner", "ComplaintHistory: banner failed: ${adError.message} (${adError.code})")
+                binding.adViewBanner.visibility = View.GONE
+            }
+        }
+        binding.adViewBanner.loadAd(AdRequest.Builder().build())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.adViewBanner.resume()
+    }
+
+    override fun onPause() {
+        binding.adViewBanner.pause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        binding.adViewBanner.destroy()
+        super.onDestroy()
     }
 
     private fun setupRecyclerView() {
