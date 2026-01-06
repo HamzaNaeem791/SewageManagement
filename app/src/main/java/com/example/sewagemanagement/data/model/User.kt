@@ -7,5 +7,6 @@ data class User(
     val dob: String = "",
     val phoneNumber: String = "",
     val address: String = "",
-    val role: String = "citizen" // values: "citizen", "worker", "admin"
+    val role: String = "citizen", // values: "citizen", "worker", "admin"
+    val disabled: Boolean = false
 )

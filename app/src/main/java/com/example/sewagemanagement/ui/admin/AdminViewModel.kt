@@ -20,6 +20,9 @@ class AdminViewModel(
     private val _createWorkerStatus = MutableStateFlow<Resource<String>?>(null)
     val createWorkerStatus: StateFlow<Resource<String>?> = _createWorkerStatus.asStateFlow()
 
+    private val _disableWorkerStatus = MutableStateFlow<Resource<String>?>(null)
+    val disableWorkerStatus: StateFlow<Resource<String>?> = _disableWorkerStatus.asStateFlow()
+
     fun fetchWorkers() {
         _workers.value = Resource.Loading()
         viewModelScope.launch {
@@ -53,5 +56,22 @@ class AdminViewModel(
 
     fun resetCreateWorkerStatus() {
         _createWorkerStatus.value = null
+    }
+
+    fun disableWorker(workerUserId: String) {
+        if (workerUserId.isBlank()) {
+            _disableWorkerStatus.value = Resource.Error("Invalid worker")
+            return
+        }
+
+        _disableWorkerStatus.value = Resource.Loading()
+        viewModelScope.launch {
+            val result = authRepository.disableWorker(workerUserId)
+            _disableWorkerStatus.value = result
+        }
+    }
+
+    fun resetDisableWorkerStatus() {
+        _disableWorkerStatus.value = null
     }
 }
