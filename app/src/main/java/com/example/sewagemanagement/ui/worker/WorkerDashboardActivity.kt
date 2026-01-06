@@ -49,9 +49,22 @@ class WorkerDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        val adapter = ComplaintAdapter(onItemClick = { complaint ->
-            showStatusUpdateDialog(complaint)
-        })
+        val adapter = ComplaintAdapter(
+            onItemClick = { complaint ->
+                showStatusUpdateDialog(complaint)
+            },
+            onMapClick = { complaint ->
+                val gmmIntentUri = android.net.Uri.parse("geo:${complaint.location?.latitude},${complaint.location?.longitude}?q=${complaint.location?.latitude},${complaint.location?.longitude}(Issue Location)")
+                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                mapIntent.setPackage("com.google.android.apps.maps")
+                if (mapIntent.resolveActivity(packageManager) != null) {
+                    startActivity(mapIntent)
+                } else {
+                    // Fallback to any app that can handle geo intents
+                    startActivity(Intent(Intent.ACTION_VIEW, gmmIntentUri))
+                }
+            }
+        )
         binding.rvAssignedJobs.layoutManager = LinearLayoutManager(this)
         binding.rvAssignedJobs.adapter = adapter
 
