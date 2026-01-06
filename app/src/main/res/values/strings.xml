@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SewageManagement</string>
+
+    <!-- AdMob (release / production IDs). Debug builds override these with Google test IDs. -->
+    <string name="admob_app_id">ca-app-pub-8353561167653029~2343715354</string>
+    <string name="admob_banner_ad_unit_id">ca-app-pub-8353561167653029/2527548182</string>
 </resources>

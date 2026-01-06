@@ -51,7 +51,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8353561167653029~2343715354" />
+            android:value="@string/admob_app_id" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

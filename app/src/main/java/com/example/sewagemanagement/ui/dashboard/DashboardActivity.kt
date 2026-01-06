@@ -47,7 +47,7 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupBannerAd() {
-        Log.d("AdMobBanner", "Dashboard: loading banner")
+        Log.d("AdMobBanner", "Dashboard: loading banner (unitId=${binding.adViewBanner.adUnitId})")
         binding.adViewBanner.adListener = object : AdListener() {
             override fun onAdLoaded() {
                 Log.d("AdMobBanner", "Dashboard: banner loaded")

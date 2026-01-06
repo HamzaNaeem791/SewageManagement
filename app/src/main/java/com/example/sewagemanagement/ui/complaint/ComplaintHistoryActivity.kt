@@ -60,7 +60,7 @@ class ComplaintHistoryActivity : AppCompatActivity() {
     }
 
     private fun setupBannerAd() {
-        Log.d("AdMobBanner", "ComplaintHistory: loading banner")
+        Log.d("AdMobBanner", "ComplaintHistory: loading banner (unitId=${binding.adViewBanner.adUnitId})")
         binding.adViewBanner.adListener = object : AdListener() {
             override fun onAdLoaded() {
                 Log.d("AdMobBanner", "ComplaintHistory: banner loaded")

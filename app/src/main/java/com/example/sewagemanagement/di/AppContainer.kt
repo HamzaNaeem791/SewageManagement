@@ -12,7 +12,6 @@ import com.google.firebase.functions.FirebaseFunctions
  */
 class AppContainer {
 
-    // Firebase Instances (Lazy initialization)
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
     private val functions: FirebaseFunctions by lazy { FirebaseFunctions.getInstance() }
