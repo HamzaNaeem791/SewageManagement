@@ -9,8 +9,10 @@ import com.example.sewagemanagement.ui.worker.WorkerDashboardActivity
 
 object RoleNavigator {
 
+    private fun normalizeRole(role: String): String = role.trim().lowercase()
+
     fun intentForRole(context: Context, role: String): Intent {
-        return when (role) {
+        return when (normalizeRole(role)) {
             "admin" -> Intent(context, AdminDashboardActivity::class.java)
             "worker" -> Intent(context, WorkerDashboardActivity::class.java)
             else -> Intent(context, DashboardActivity::class.java)

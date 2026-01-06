@@ -121,8 +121,14 @@ class LoginActivity : AppCompatActivity() {
                     RoleNavigator.startAndClearTask(this@LoginActivity, role)
                 }
                 is Resource.Error -> {
-                    // Fallback to citizen dashboard if profile doc is missing
-                    RoleNavigator.startAndClearTask(this@LoginActivity, "citizen")
+                    // If profile doc is missing/blocked by rules, don't silently route to citizen.
+                    // This usually indicates the seeded admin doesn't have a users/{uid} doc with role.
+                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                    Toast.makeText(
+                        this@LoginActivity,
+                        result.message ?: "User profile not found. Ask admin to seed your role in Firestore.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
                 is Resource.Loading -> {
                     // no-op

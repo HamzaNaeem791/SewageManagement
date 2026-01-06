@@ -56,7 +56,7 @@ class WorkerDashboardActivity : AppCompatActivity() {
             val authRepository = (application as SewageApplication).container.authRepository
             when (val result = authRepository.getUser(userId)) {
                 is Resource.Success -> {
-                    val role = result.data?.role ?: "citizen"
+                    val role = (result.data?.role ?: "citizen").trim().lowercase()
                     if (role != "worker") {
                         RoleNavigator.startAndClearTask(this@WorkerDashboardActivity, role)
                     }
