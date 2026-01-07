@@ -86,6 +86,7 @@ class RegisterActivity : AppCompatActivity() {
             binding.tilName,
             binding.tilEmail,
             binding.tilPassword,
+            binding.tilConfirmPassword,
             binding.llAgreement,
             binding.btnRegister,
             binding.tvLogin
@@ -116,6 +117,47 @@ class RegisterActivity : AppCompatActivity() {
             val name = binding.etName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
+            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
+
+            // Reset errors
+            binding.tilName.error = null
+            binding.tilEmail.error = null
+            binding.tilPassword.error = null
+            binding.tilConfirmPassword.error = null
+
+            // Validations
+            if (name.isEmpty()) {
+                binding.tilName.error = "Name is required"
+                return@setOnClickListener
+            }
+            if (!name.matches(Regex("^[a-zA-Z\\s]*$"))) {
+                binding.tilName.error = "Name must only contain alphabets"
+                return@setOnClickListener
+            }
+
+            if (email.isEmpty()) {
+                binding.tilEmail.error = "Email is required"
+                return@setOnClickListener
+            }
+            if (!email.endsWith("@gmail.com")) {
+                binding.tilEmail.error = "Please use a valid @gmail.com address"
+                return@setOnClickListener
+            }
+
+            if (password.isEmpty()) {
+                binding.tilPassword.error = "Password is required"
+                return@setOnClickListener
+            }
+            if (password.length < 6) {
+                binding.tilPassword.error = "Password must be at least 6 characters"
+                return@setOnClickListener
+            }
+
+            if (confirmPassword != password) {
+                binding.tilConfirmPassword.error = "Passwords do not match"
+                return@setOnClickListener
+            }
+
             viewModel.register(name, email, password)
         }
 

@@ -96,6 +96,18 @@
                     android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="Forgot Password?"
+                android:textColor="@color/primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:padding="4dp"/>
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"

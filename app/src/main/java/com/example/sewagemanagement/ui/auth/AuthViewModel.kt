@@ -26,6 +26,18 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun resetPassword(email: String) {
+        if (email.isBlank()) {
+            _authStatus.value = Resource.Error("Please enter your email")
+            return
+        }
+        _authStatus.value = Resource.Loading()
+        viewModelScope.launch {
+            val result = repository.resetPassword(email)
+            _authStatus.value = result
+        }
+    }
+
     fun register(name: String, email: String, pass: String) {
         if (name.isBlank() || email.isBlank() || pass.isBlank()) {
             _authStatus.value = Resource.Error("All fields are required")

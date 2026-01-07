@@ -49,6 +49,15 @@ class AuthRepository(
         }
     }
 
+    suspend fun resetPassword(email: String): Resource<String> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Resource.Success("Password reset email sent")
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to send reset email")
+        }
+    }
+
     suspend fun register(name: String, email: String, pass: String): Resource<String> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, pass).await()

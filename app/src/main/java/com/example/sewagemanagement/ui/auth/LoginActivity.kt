@@ -48,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
             binding.tvSubtitle,
             binding.tilEmail,
             binding.tilPassword,
+            binding.tvForgotPassword,
             binding.btnLogin,
             binding.tvRegister
         )
@@ -78,6 +79,16 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+        }
+
+        binding.tvForgotPassword.setOnClickListener {
+            val email = binding.etEmail.text.toString().trim()
+            if (email.isEmpty()) {
+                binding.tilEmail.error = "Enter email to reset password"
+            } else {
+                binding.tilEmail.error = null
+                viewModel.resetPassword(email)
+            }
         }
     }
 
